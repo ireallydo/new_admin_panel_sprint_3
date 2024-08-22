@@ -1,0 +1,110 @@
+version: '3'
+
+x-default: &default
+  restart: unless-stopped
+  networks:
+    - etl_network
+
+x-py-env: &py-env
+  env_file:
+    - etl/environment/.env
+
+x-heathcheck-interval: &hc-interval
+  interval: 5s
+  retries: 10
+  timeout: 5s
+  start_period: 2s
+
+
+services:
+
+  redis:
+    <<: *default
+    image: redis:latest
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_USER=${REDIS_USER}
+      - REDIS_USER_PASSWORD=${REDIS_USER_PASSWORD}
+    ports:
+      - ${REDIS_PORTS}
+    volumes:
+      - ./redisdata:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    command: >
+      sh -c '
+        mkdir -p /usr/local/etc/redis &&
+        echo "bind 0.0.0.0" > /usr/local/etc/redis/redis.conf &&
+        echo "requirepass $REDIS_PASSWORD" >> /usr/local/etc/redis/redis.conf &&
+        echo "appendonly yes" >> /usr/local/etc/redis/redis.conf &&
+        echo "appendfsync everysec" >> /usr/local/etc/redis/redis.conf &&
+        echo "user default on nopass ~* +@all" > /usr/local/etc/redis/users.acl &&
+        echo "user $REDIS_USER on >$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
+        redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
+      '
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+
+#  service:
+#    <<: [*default, *py-env]
+#    build:
+#      context: app
+#      dockerfile: Dockerfile.service
+#    expose:
+#      - "8000"
+#    depends_on:
+#      redis:
+#        condition: service_healthy
+#      theatre-db:
+#        condition: service_healthy
+#      elasticsearch:
+#        condition: service_healthy
+
+  elasticsearch:
+    <<: *default
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms200m -Xmx200m
+    ports:
+      - ${ELASTIC_PORTS}
+    volumes:
+       - elasticsearch:/usr/share/elasticsearch/data
+    healthcheck:
+      <<: *hc-interval
+      test: curl -s http://elasticsearch:9200 >/dev/null || exit 1
+
+
+  theatre-db:
+    <<: *default
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./database_dump.sql:/docker-entrypoint-initdb.d/init.sql
+#      - postgresql-data:/var/lib/postgresql
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    healthcheck:
+      <<: *hc-interval
+      test: [ "CMD-SHELL", "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER || exit 1"]
+
+volumes:
+#  postgresql-data:
+  elasticsearch:
+
+networks:
+  etl_network:
