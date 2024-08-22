@@ -67,13 +67,13 @@ class TransformService:
         # для того чтобы можно было изменять объект фильма и добавлять в него ключи,
         # меняем тип объекта с экземпляра sqlalchemy.engine.row.RowMapping на словарь
         movie = dict(movie)
-        # удаляем ненужные ключи
+        # удаляем ключи, которые не присутствуют в нашей схеме
         del movie['role']
         del movie['person_name']
         del movie['person_id']
         del movie['name']
         # вместо них добавляем ключи с агрегированными данными
-        movie['genres'] = movie_genres
+        movie['genres'] = list(movie_genres)
         movie['actors'] = self.helper_make_person_dict(movie_actors)
         movie['actors_names'] = [actor['name'] for actor in movie['actors']]
         movie['directors'] = self.helper_make_person_dict(movie_directors)
