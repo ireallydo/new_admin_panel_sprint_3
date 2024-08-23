@@ -16,5 +16,20 @@ class LoadService:
                 update_movies.append(movie)
             else:
                 create_movies.append(movie)
-        self._dao.parallel_create_bulk(create_movies)
-        self._dao.parallel_update_bulk(update_movies)
+
+        response = list()
+
+        if create_movies:
+            create_response = self._dao.parallel_create_bulk(create_movies)
+            if create_response:
+                response.append(create_response)
+            else:
+                return False
+        if update_movies:
+            update_response = self._dao.parallel_update_bulk(update_movies)
+            if update_response:
+                response.append(update_response)
+            else:
+                return False
+
+        return response

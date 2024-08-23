@@ -1,21 +1,21 @@
 from services.dto import ExtractSchema, EnrichSchema, MergeSchema
-from .constants import SCHEMA
+from .constants import SCHEMA, ENRICHER_LOAD_LIMIT
 from typing import Set
 
 
 class Config:
 
     @classmethod
-    def create_extract_config(cls):
+    def create_extract_config(cls, modified: str):
         extract_config = ExtractSchema(
             table=f'{SCHEMA}.person',
-            modified='1000-01-01 00:00:00.000000',
-            limit=500
+            modified=modified,
+            limit=100
         )
         return extract_config
 
     @classmethod
-    def create_enrich_config(cls, persons_ids: Set[str]):
+    def create_enrich_config(cls, persons_ids: Set[str], offset: int):
         enrich_config = EnrichSchema(
             table=f'{SCHEMA}.film_work',
             join_tb_cols_value={
@@ -28,7 +28,8 @@ class Config:
                 'person_id'
             ),
             filter_values=persons_ids,
-            limit=500
+            limit=ENRICHER_LOAD_LIMIT,
+            offset=offset
         )
         return enrich_config
 

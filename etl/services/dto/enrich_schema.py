@@ -8,3 +8,4 @@ class EnrichSchema(BaseModel):
     filter_tb_col: Tuple[str, str]
     filter_values: Union[set, list]
     limit: int = 100
+    offset: int
