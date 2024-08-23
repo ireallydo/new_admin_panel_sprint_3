@@ -1,10 +1,12 @@
 from elasticsearch import Elasticsearch, NotFoundError
+from fault_tolerance_sys.es_backoff import es_connection_backoff
 import json
 
 
 es = Elasticsearch("http://127.0.0.1:9200")
 
 
+@es_connection_backoff
 def init_index(idx: str):
     try:
         index = es.indices.get(index=idx)

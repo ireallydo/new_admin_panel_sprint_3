@@ -1,7 +1,8 @@
 from elasticsearch import Elasticsearch, BadRequestError, NotFoundError, RequestError
 from elasticsearch.helpers import parallel_bulk, bulk
 from .es_connector import es
-from typing import Union, List
+from fault_tolerance_sys.es_backoff import es_connection_backoff
+from typing import List
 
 
 class ElasticsearchDAO:
@@ -28,6 +29,7 @@ class ElasticsearchDAO:
                 "doc": movie
             }
 
+    @es_connection_backoff
     def parallel_create_bulk(self, movies_data: List[dict]):
         response = list()
         for success, info in parallel_bulk(self._con,
@@ -40,6 +42,7 @@ class ElasticsearchDAO:
                 response.append(info)
         return response
 
+    @es_connection_backoff
     def parallel_update_bulk(self, movies_data: List[dict]):
         response = list()
         for success, info in parallel_bulk(self._con,
@@ -52,5 +55,6 @@ class ElasticsearchDAO:
                 response.append(info)
         return response
 
+    @es_connection_backoff
     def exists(self, id: str):
         return self._con.exists(index=self._idx, id=id)

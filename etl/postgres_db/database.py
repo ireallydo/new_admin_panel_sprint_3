@@ -15,6 +15,7 @@ engine = create_engine(db_con_str, echo=False, pool_pre_ping=True)
 SessionLocal = sessionmaker(engine, autocommit=False, autoflush=False, class_=Session)
 
 
+# backoff система для коннекта с базой данных
 @event.listens_for(engine, 'close')
 def receive_close(dbapi_connection, connection_record):
     "listen for the 'close' event"
@@ -40,6 +41,3 @@ def receive_close(dbapi_connection, connection_record):
             break
         except OperationalError:
             print('Still not working')
-
-
-    # ... (event handling logic) ...
