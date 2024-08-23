@@ -1,8 +1,13 @@
+from fault_tolerance_sys.backoff import PGBackoff
+from postgres_db.database import SessionLocal
+from postgres_db.dto import ExtractSchema
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 from typing import Type
-from postgres_db.database import SessionLocal
-from services.dto import ExtractSchema
+import logging
+
+
+logger = logging.getLogger()
 
 
 class ExtractorDAO:
@@ -10,7 +15,10 @@ class ExtractorDAO:
     def __init__(self, session_generator: Type[Session] = SessionLocal):
         self._session_generator = session_generator
 
+    @PGBackoff.server_backoff
+    @PGBackoff.timeout_backoff
     def get_modified_data(self, config: ExtractSchema):
+        logger.info("Making request to database")
         with self._session_generator() as session:
             query = text(f"""
                 SELECT id, modified
@@ -19,6 +27,9 @@ class ExtractorDAO:
                 ORDER BY modified
                 LIMIT {config.limit};
                 """)
+            logger.debug(f"Request query string: {query}")
+
             result = session.execute(query)
             resp = [raw for raw in result]
+            logger.debug(f"Got response from database: {resp}")
             return resp

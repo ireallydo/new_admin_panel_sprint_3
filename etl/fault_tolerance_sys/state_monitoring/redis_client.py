@@ -1,13 +1,16 @@
 import redis
 from settings import Settings
+import logging
 
 
 settings = Settings()
+logger = logging.getLogger()
 
 
 class RedisClient:
 
     def get_connection(self):
+        logger.info("Create Redis connection")
         connection = redis.Redis(
             host=settings.REDIS_HOST,
             port=settings.REDIS_PORT,
@@ -17,14 +20,14 @@ class RedisClient:
         )
         try:
             info = connection.info()
-            print(info['redis_version'])
+            logger.debug(f"Redis version: {info['redis_version']}")
             response = connection.ping()
             if response:
-                print("Подключение успешно!")
+                logger.info("Successfully connected to Redis")
             else:
-                print("Не удалось подключиться к Redis.")
+                logger.critical("Failed to connect to Redis")
         except redis.exceptions.RedisError as e:
-            print(f"Ошибка: {e}")
+            logger.critical(e)
         return connection
 
 

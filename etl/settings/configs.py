@@ -1,12 +1,17 @@
-from services.dto import ExtractSchema, EnrichSchema, MergeSchema
+from postgres_db.dto import ExtractSchema, EnrichSchema, MergeSchema
 from .constants import SCHEMA, ENRICHER_LOAD_LIMIT
 from typing import Set
+import logging
+
+
+logger = logging.getLogger()
 
 
 class Config:
 
     @classmethod
     def create_extract_config(cls, modified: str):
+        logger.info(f"Create extractor config with modified value: {modified}")
         extract_config = ExtractSchema(
             table=f'{SCHEMA}.person',
             modified=modified,
@@ -16,6 +21,8 @@ class Config:
 
     @classmethod
     def create_enrich_config(cls, persons_ids: Set[str], offset: int):
+        logger.info(f"Create enricher config with offset: {offset}")
+        logger.debug(f"Persons ids passed to enricher config: {persons_ids}")
         enrich_config = EnrichSchema(
             table=f'{SCHEMA}.film_work',
             join_tb_cols_value={
@@ -35,6 +42,8 @@ class Config:
 
     @classmethod
     def create_merge_config(cls, movies_ids: Set[str]):
+        logger.info("Create merger config")
+        logger.debug(f"Movies ids passed to enricher config: {movies_ids}")
         merge_config = MergeSchema(
             table=f'{SCHEMA}.film_work',
             select_tb_cols={

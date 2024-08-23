@@ -1,8 +1,13 @@
+from fault_tolerance_sys.backoff import PGBackoff
+from postgres_db.database import SessionLocal
+from postgres_db.dto import EnrichSchema
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 from typing import Type
-from postgres_db.database import SessionLocal
-from services.dto import EnrichSchema
+import logging
+
+
+logger = logging.getLogger()
 
 
 class EnricherDAO:
@@ -10,7 +15,10 @@ class EnricherDAO:
     def __init__(self, session_generator: Type[Session] = SessionLocal):
         self._session_generator = session_generator
 
+    @PGBackoff.server_backoff
+    @PGBackoff.timeout_backoff
     def get_related_data(self, config: EnrichSchema):
+        logger.info("Making request to database")
         with self._session_generator() as session:
             filter_values = "'"+"', '".join(config.filter_values)+"'"
 
@@ -38,6 +46,9 @@ class EnricherDAO:
                     OFFSET {config.offset};
                 """
             )
+            logger.debug(f"Request query string: {query}")
+
             result = session.execute(query)
             resp = [raw for raw in result]
+            logger.debug(f"Got response from database: {resp}")
             return resp

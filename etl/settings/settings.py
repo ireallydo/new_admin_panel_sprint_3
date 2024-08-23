@@ -1,6 +1,7 @@
-from pydantic import Field
 from pydantic_settings import BaseSettings
+from pydantic import Field
 from pathlib import Path
+
 
 class Settings(BaseSettings):
 
@@ -10,6 +11,7 @@ class Settings(BaseSettings):
     DB_USER: str = Field(..., env="DB_USER")
     DB_PASSWORD: str = Field(..., env="DB_PASSWORD")
 
+    ELASTIC_HOST: str = Field(..., env="ELASTIC_HOST")
     ELASTIC_PORT: str = Field(..., env="ELASTIC_PORT")
 
     REDIS_HOST: str = Field(..., env="REDIS_HOST")
