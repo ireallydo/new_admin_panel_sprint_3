@@ -1,4 +1,4 @@
-from .dto import ExtractSchema, EnrichSchema, MergeSchema
+from postgres_db.dto import ExtractSchema, EnrichSchema, MergeSchema
 from postgres_db.dao import ExtractorDAO, EnricherDAO, MergerDAO
 
 

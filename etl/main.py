@@ -71,17 +71,16 @@ def main():
                         monitor.set_state(R_ENRICHER_STATE,
                                           new_enricher_state)
 
-                    sleep(2)
+                    sleep(1)
                 else:
                     # все записи, которые были доступны по выбранным персонам, записаны
                     # устанавливаем новое состояние для экстрактора и переходим в начало петли
                     monitor.set_state(R_EXTRACTOR_STATE,
                                       new_extractor_state)
-                    sleep(10)
+                    sleep(2)
                     break
         else:
-            print("That's all, folks!")
-            break
+            sleep(60)
 
 
 if __name__ == '__main__':

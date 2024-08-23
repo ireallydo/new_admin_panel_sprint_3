@@ -1,5 +1,5 @@
 from elasticsearch import Elasticsearch, NotFoundError, ApiError
-from fault_tolerance_sys.es_backoff import ESBackoff
+from fault_tolerance_sys.backoff import ESBackoff
 import json
 
 

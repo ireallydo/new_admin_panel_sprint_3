@@ -2,7 +2,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 from typing import Type
 from postgres_db.database import SessionLocal
-from services.dto import MergeSchema
+from postgres_db.dto import MergeSchema
+from fault_tolerance_sys.backoff import PGBackoff
 
 
 class MergerDAO:
@@ -10,6 +11,8 @@ class MergerDAO:
     def __init__(self, session_generator: Type[Session] = SessionLocal):
         self._session_generator = session_generator
 
+    @PGBackoff.server_backoff
+    @PGBackoff.timeout_backoff
     def get_merged_data(self, config: MergeSchema):
         with self._session_generator() as session:
             filter_values = "'"+"', '".join(config.filter_values)+"'"

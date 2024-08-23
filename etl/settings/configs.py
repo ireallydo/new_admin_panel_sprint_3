@@ -1,4 +1,4 @@
-from services.dto import ExtractSchema, EnrichSchema, MergeSchema
+from postgres_db.dto import ExtractSchema, EnrichSchema, MergeSchema
 from .constants import SCHEMA, ENRICHER_LOAD_LIMIT
 from typing import Set
 

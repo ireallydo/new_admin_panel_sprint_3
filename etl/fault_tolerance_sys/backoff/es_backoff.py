@@ -46,7 +46,7 @@ class ESBackoff:
                             if timeout < max_timeout:
                                 timeout, next_timeout = next_timeout, timeout + next_timeout
                             return func(*args, **kwargs)
-                        except ConnectionError:
+                        except ApiError:
                             print('Still not working')
                 else:
                     print('Client problem with Elasticsearch. Raising exception')

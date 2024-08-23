@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch, BadRequestError, NotFoundError, RequestError
 from elasticsearch.helpers import parallel_bulk, bulk
 from .es_connector import es
-from fault_tolerance_sys.es_backoff import ESBackoff
+from fault_tolerance_sys.backoff import ESBackoff
 from typing import List
 
 
