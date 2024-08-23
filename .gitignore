@@ -161,3 +161,7 @@ cython_debug/
 
 # Redis
 /redisdata
+
+# Logger
+/logs
+.log

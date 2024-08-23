@@ -1,10 +1,15 @@
 from typing import List, Set
 from sqlalchemy.engine.row import RowMapping
+import logging
+
+
+logger = logging.getLogger()
 
 
 class TransformService:
 
     def pg_to_es_transform_data(self, movies_ids: Set[str], movies_data: List[RowMapping]) -> List[dict]:
+        logger.info("Transforming data from Postgres to Elsaticsearch index format")
         # переменная для хранения массива словарей с полными данными о фильме
         # один словарь == один фильм
         merged_data = list()
@@ -22,6 +27,7 @@ class TransformService:
         return merged_data
 
     def sort_movies_data(self, movie_id: str, all_movies_data: List[RowMapping]) -> List[RowMapping]:
+        logger.info(f"Sorting movies data to get only that related to movie with id {movie_id}")
         # переменная для хранения всех объектов, относящихся к конкретному фильму
         movie_objects = []
         # выбираем из результатов из БД те, что относятся к этому фильму
@@ -32,6 +38,7 @@ class TransformService:
         return movie_objects
 
     def merge_movie_data(self, movie_objects: List[RowMapping]) -> dict:
+        logger.info("Merging movie data from different rows into one dictionary")
         movie_genres = set()
         movie_actors = set()
         movie_directors = set()
@@ -64,6 +71,7 @@ class TransformService:
                                      movie_actors: set,
                                      movie_directors: set,
                                      movie_writers: set) -> dict:
+        logger.info("Enclosing keys/values needed for Elasticsearch index to dictionary and cleaning extra ones")
         # для того чтобы можно было изменять объект фильма и добавлять в него ключи,
         # меняем тип объекта с экземпляра sqlalchemy.engine.row.RowMapping на словарь
         movie = dict(movie)
@@ -85,6 +93,7 @@ class TransformService:
         return movie
 
     def helper_make_person_dict(self, movie_persons: set) -> list:
+        logger.info("Making a dictionary out of a person data")
         return list(
             {
                 'id': str(person[0]),

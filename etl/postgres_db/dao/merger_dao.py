@@ -1,9 +1,13 @@
+from fault_tolerance_sys.backoff import PGBackoff
+from postgres_db.database import SessionLocal
+from postgres_db.dto import MergeSchema
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 from typing import Type
-from postgres_db.database import SessionLocal
-from postgres_db.dto import MergeSchema
-from fault_tolerance_sys.backoff import PGBackoff
+import logging
+
+
+logger = logging.getLogger()
 
 
 class MergerDAO:
@@ -14,6 +18,7 @@ class MergerDAO:
     @PGBackoff.server_backoff
     @PGBackoff.timeout_backoff
     def get_merged_data(self, config: MergeSchema):
+        logger.info("Making request to database")
         with self._session_generator() as session:
             filter_values = "'"+"', '".join(config.filter_values)+"'"
 
@@ -46,7 +51,9 @@ class MergerDAO:
                     IN ({filter_values});
                 """
             )
+            logger.debug(f"Request query string: {query}")
 
             result = session.execute(query)
             results_as_dict = result.mappings().all()
+            logger.debug(f"Got response from database: {results_as_dict}")
             return results_as_dict
