@@ -5,7 +5,7 @@ from settings import Settings
 settings = Settings()
 
 
-class Redis:
+class RedisClient:
 
     def get_connection(self):
         connection = redis.Redis(
@@ -28,4 +28,4 @@ class Redis:
         return connection
 
 
-redis_client = Redis()
+redis_client = RedisClient()

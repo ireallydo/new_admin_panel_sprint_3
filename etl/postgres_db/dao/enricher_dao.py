@@ -34,7 +34,8 @@ class EnricherDAO:
                     WHERE {config.filter_tb_col[0]}.{config.filter_tb_col[1]}
                     IN ({filter_values})
                     ORDER BY {config.table}.modified
-                    LIMIT {config.limit};
+                    LIMIT {config.limit}
+                    OFFSET {config.offset};
                 """
             )
             result = session.execute(query)

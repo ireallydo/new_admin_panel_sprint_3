@@ -1,5 +1,5 @@
 import abc
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 
 class BaseStorage(abc.ABC):
@@ -16,5 +16,5 @@ class BaseStorage(abc.ABC):
         """Сохранить состояние в хранилище."""
 
     @abc.abstractmethod
-    def retrieve_state(self) -> Dict[str, Any]:
+    def retrieve_state(self, key: Union[str, Any]) -> Dict[str, Any]:
         """Получить состояние из хранилища."""
