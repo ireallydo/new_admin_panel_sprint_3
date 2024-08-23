@@ -1,0 +1,63 @@
+# о паттерне для вложенных директорий и файлов:
+# https://github.com/moby/moby/issues/27144
+# https://github.com/moby/moby/issues/27144#issuecomment-471695303
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# git
+.git
+.gitignore
+
+# env
+.env.example
+**/.env.example
+
+#
+Makefile
+README.md
+
+# Distribution / packaging
+.Python
+env/
+venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+.local/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Docker
+Dockerfile
+Dockerfile.*
+docker-compose.yml
+docker-compose.override.yml
+.dockerignore
+
+# JetBrains
+./idea
+
+# VSCode
+.vscode
+
+# Logs
+/logs
+*.log
+*.log.*
+app_log.*
+
+# Postman
+postman_tests.json

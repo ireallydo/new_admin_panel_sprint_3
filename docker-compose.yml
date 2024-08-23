@@ -25,8 +25,8 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - REDIS_USER=${REDIS_USER}
       - REDIS_USER_PASSWORD=${REDIS_USER_PASSWORD}
-    ports:
-      - ${REDIS_PORTS}
+    expose:
+      - ${REDIS_EXPOSE_PORT}
     volumes:
       - ./redisdata:/data
     deploy:
@@ -55,20 +55,18 @@ services:
       retries: 5
 
 
-#  service:
-#    <<: [*default, *py-env]
-#    build:
-#      context: app
-#      dockerfile: Dockerfile.service
-#    expose:
-#      - "8000"
-#    depends_on:
-#      redis:
-#        condition: service_healthy
-#      theatre-db:
-#        condition: service_healthy
-#      elasticsearch:
-#        condition: service_healthy
+  app:
+    <<: [*default, *py-env]
+    build:
+      context: etl
+      dockerfile: Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+      theatre-db:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
 
   elasticsearch:
     <<: *default
@@ -77,8 +75,8 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - ES_JAVA_OPTS=-Xms200m -Xmx200m
-    ports:
-      - ${ELASTIC_PORTS}
+    expose:
+      - ${ELASTIC_EXPOSE_PORT}
     volumes:
        - elasticsearch:/usr/share/elasticsearch/data
     healthcheck:
@@ -95,16 +93,17 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - ./database_dump.sql:/docker-entrypoint-initdb.d/init.sql
-#      - postgresql-data:/var/lib/postgresql
-    ports:
-      - ${DB_PORT}:${DB_PORT}
+      - postgresql-data:/var/lib/postgresql
+    expose:
+      - ${DB_PORT}
     healthcheck:
       <<: *hc-interval
       test: [ "CMD-SHELL", "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER || exit 1"]
 
 volumes:
-#  postgresql-data:
+  postgresql-data:
   elasticsearch:
+  redisdata:
 
 networks:
   etl_network:
