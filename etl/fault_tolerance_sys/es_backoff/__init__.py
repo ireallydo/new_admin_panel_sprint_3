@@ -1,1 +1,1 @@
-from .es_backoff import es_connection_backoff
+from .es_backoff import ESBackoff
