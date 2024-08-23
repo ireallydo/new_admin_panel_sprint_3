@@ -164,4 +164,5 @@ cython_debug/
 
 # Logger
 /logs
-.log
+.log.*
+app_log.*
