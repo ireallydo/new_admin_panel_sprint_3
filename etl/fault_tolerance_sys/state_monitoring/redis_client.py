@@ -1,6 +1,8 @@
-import redis
-from settings import Settings
 import logging
+
+import redis
+
+from settings import Settings
 
 
 settings = Settings()

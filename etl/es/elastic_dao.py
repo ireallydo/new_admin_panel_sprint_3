@@ -1,10 +1,13 @@
-from elasticsearch import Elasticsearch, BadRequestError, NotFoundError, RequestError
-from elasticsearch.helpers import parallel_bulk, bulk
-from fault_tolerance_sys.backoff import ESBackoff
-from .es_connector import es
-from typing import List
 import logging
+from typing import List
 
+from elasticsearch import (BadRequestError, Elasticsearch, NotFoundError,
+                           RequestError)
+from elasticsearch.helpers import bulk, parallel_bulk
+
+from fault_tolerance_sys.backoff import ESBackoff
+
+from .es_connector import es
 
 logger = logging.getLogger()
 
@@ -45,9 +48,10 @@ class ElasticsearchDAO:
             if not success:
                 logger.debug('A document failed: ', info)
                 return success
-            else:
-                logger.debug('Document was created: ', info)
-                response.append(info)
+
+            logger.debug('Document was created: ', info)
+            response.append(info)
+
         return response
 
     @ESBackoff.connection_backoff
@@ -60,15 +64,16 @@ class ElasticsearchDAO:
             if not success:
                 logger.debug('A document failed: ', info)
                 return success
-            else:
-                logger.debug('Document was updated: ', info)
-                response.append(info)
+
+            logger.debug('Document was updated: ', info)
+            response.append(info)
+
         return response
 
     @ESBackoff.connection_backoff
     @ESBackoff.server_backoff
-    def exists(self, id: str):
-        logger.info(f"Checking if document with id {id} exists in index {self._idx}")
-        response = self._con.exists(index=self._idx, id=id)
-        logger.info(f"Response about document with id {id} existing in index {self._idx}: {response}")
+    def exists(self, doc_id: str):
+        logger.info(f"Checking if document with id {doc_id} exists in index {self._idx}")
+        response = self._con.exists(index=self._idx, id=doc_id)
+        logger.info(f"Response about document with id {doc_id} existing in index {self._idx}: {response}")
         return response

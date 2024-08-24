@@ -1,7 +1,9 @@
-from postgres_db.dto import ExtractSchema, EnrichSchema, MergeSchema
-from .constants import SCHEMA, ENRICHER_LOAD_LIMIT
-from typing import Set
 import logging
+from typing import Set
+
+from postgres_db.dto import EnrichSchema, ExtractSchema, MergeSchema
+
+from .constants import ENRICHER_LOAD_LIMIT, SCHEMA
 
 
 logger = logging.getLogger()

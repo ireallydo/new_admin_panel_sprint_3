@@ -1,6 +1,7 @@
-from sqlalchemy.exc import DBAPIError, TimeoutError
-from time import sleep
 import logging
+from time import sleep
+
+from sqlalchemy.exc import DBAPIError, TimeoutError
 
 
 logger = logging.getLogger()

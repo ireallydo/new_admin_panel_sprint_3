@@ -1,9 +1,11 @@
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.exc import OperationalError
-from sqlalchemy import create_engine, event
-from settings import Settings
-from time import sleep
 import logging
+from time import sleep
+
+from sqlalchemy import create_engine, event
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.orm import Session, sessionmaker
+
+from settings import Settings
 
 
 logger = logging.getLogger()

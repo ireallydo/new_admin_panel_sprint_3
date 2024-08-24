@@ -1,6 +1,7 @@
-from postgres_db.dto import ExtractSchema, EnrichSchema, MergeSchema
-from postgres_db.dao import ExtractorDAO, EnricherDAO, MergerDAO
 import logging
+
+from postgres_db.dao import EnricherDAO, ExtractorDAO, MergerDAO
+from postgres_db.dto import EnrichSchema, ExtractSchema, MergeSchema
 
 
 logger = logging.getLogger()

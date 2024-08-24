@@ -1,9 +1,10 @@
-from elasticsearch import Elasticsearch, NotFoundError, ApiError
+import json
+import logging
+
+from elasticsearch import ApiError, Elasticsearch, NotFoundError
+
 from fault_tolerance_sys.backoff import ESBackoff
 from settings import Settings
-import logging
-import json
-
 
 settings = Settings()
 logger = logging.getLogger()

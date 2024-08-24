@@ -1,6 +1,7 @@
-from typing import List, Set
-from sqlalchemy.engine.row import RowMapping
 import logging
+from typing import List, Set
+
+from sqlalchemy.engine.row import RowMapping
 
 
 logger = logging.getLogger()

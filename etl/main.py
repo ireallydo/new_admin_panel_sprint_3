@@ -1,12 +1,15 @@
-from settings.constants import MOVIES_IDX, DEFAULT_EXTRACTOR_STATE, \
-    DEFAULT_ENRICHER_STATE, R_EXTRACTOR_STATE, R_ENRICHER_STATE, ENRICHER_LOAD_LIMIT
-from fault_tolerance_sys.state_monitoring import RedisStorage, State
-from services import ExtractService, TransformService, LoadService
-from es.es_connector import init_index
-from utils.logger import setup_logger
-from settings.configs import Config
-from time import sleep
 import logging
+from time import sleep
+
+from es.es_connector import init_index
+from fault_tolerance_sys.state_monitoring import RedisStorage, State
+from services import ExtractService, LoadService, TransformService
+from settings.configs import Config
+from settings.constants import (DEFAULT_ENRICHER_STATE,
+                                DEFAULT_EXTRACTOR_STATE, ENRICHER_LOAD_LIMIT,
+                                MOVIES_IDX, R_ENRICHER_STATE,
+                                R_EXTRACTOR_STATE)
+from utils.logger import setup_logger
 
 
 def main():

@@ -1,10 +1,12 @@
+import logging
+from typing import Type
+
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import text
+
 from fault_tolerance_sys.backoff import PGBackoff
 from postgres_db.database import SessionLocal
 from postgres_db.dto import ExtractSchema
-from sqlalchemy.orm import Session
-from sqlalchemy.sql import text
-from typing import Type
-import logging
 
 
 logger = logging.getLogger()

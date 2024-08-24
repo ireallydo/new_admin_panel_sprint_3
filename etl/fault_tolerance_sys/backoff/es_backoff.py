@@ -1,7 +1,8 @@
+import logging
+from time import sleep
+
 from elastic_transport import ConnectionError, ConnectionTimeout
 from elasticsearch import ApiError
-from time import sleep
-import logging
 
 
 logger = logging.getLogger()
