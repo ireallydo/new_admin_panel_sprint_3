@@ -1,4 +1,5 @@
-from typing import Union, Dict, Tuple
+from typing import Dict, Tuple, Union
+
 from pydantic import BaseModel
 
 

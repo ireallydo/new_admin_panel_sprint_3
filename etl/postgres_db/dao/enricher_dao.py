@@ -1,10 +1,12 @@
+import logging
+from typing import Type
+
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import text
+
 from fault_tolerance_sys.backoff import PGBackoff
 from postgres_db.database import SessionLocal
 from postgres_db.dto import EnrichSchema
-from sqlalchemy.orm import Session
-from sqlalchemy.sql import text
-from typing import Type
-import logging
 
 
 logger = logging.getLogger()
@@ -46,9 +48,9 @@ class EnricherDAO:
                     OFFSET {config.offset};
                 """
             )
-            logger.debug(f"Request query string: {query}")
+            logger.debug("Request query string: %s", query)
 
             result = session.execute(query)
-            resp = [raw for raw in result]
-            logger.debug(f"Got response from database: {resp}")
-            return resp
+            results_as_dict = result.mappings().all()
+            logger.debug("Got response from database: %s", results_as_dict)
+            return results_as_dict
