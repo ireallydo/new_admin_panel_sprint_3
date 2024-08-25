@@ -1,10 +1,12 @@
+import logging
+from typing import Type
+
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import text
+
 from fault_tolerance_sys.backoff import PGBackoff
 from postgres_db.database import SessionLocal
 from postgres_db.dto import MergeSchema
-from sqlalchemy.orm import Session
-from sqlalchemy.sql import text
-from typing import Type
-import logging
 
 
 logger = logging.getLogger()
@@ -51,9 +53,9 @@ class MergerDAO:
                     IN ({filter_values});
                 """
             )
-            logger.debug(f"Request query string: {query}")
+            logger.debug("Request query string: %s", query)
 
             result = session.execute(query)
             results_as_dict = result.mappings().all()
-            logger.debug(f"Got response from database: {results_as_dict}")
+            logger.debug("Got response from database: %s", results_as_dict)
             return results_as_dict

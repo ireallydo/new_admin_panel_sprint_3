@@ -1,6 +1,7 @@
-from es import ElasticsearchDAO
-from typing import List
 import logging
+from typing import List
+
+from es import ElasticsearchDAO
 
 
 logger = logging.getLogger()

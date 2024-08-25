@@ -17,6 +17,7 @@ elasticsearch = "^8.15.0"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "6.1.0"
+isort = "^5.13.2"
 
 
 [build-system]
