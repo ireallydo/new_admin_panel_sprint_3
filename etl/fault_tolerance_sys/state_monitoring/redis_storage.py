@@ -17,12 +17,12 @@ class RedisStorage(BaseStorage):
 
     def save_state(self, state: Dict[str, Any]) -> None:
         """Сохранить состояние в хранилище."""
-        logger.info(f"Save state to Redis storage: {state}")
+        logger.info("Save state to Redis storage: %s", state)
         self._redis.mset(state)
 
     def retrieve_state(self, key: Union[str, Any]) -> Dict[str, Any]:
         """Получить состояние из хранилища."""
-        logger.info(f"Get state from Redis storage by key: {key}")
+        logger.info("Get state from Redis storage by key: %s", key)
         state = self._redis.get(key)
-        logger.info(f"Got state from Redis storage by key {key}: {state}")
+        logger.info("Got state from Redis storage by key %s: %s", key, state)
         return state

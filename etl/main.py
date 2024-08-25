@@ -1,3 +1,4 @@
+from functools import partial
 import logging
 from time import sleep
 
@@ -37,7 +38,7 @@ def main():
 
         if person_data_modified:
             logger.info(f"Got non-empty response from db with modified data: persons")
-            logger.debug(f'Modified data: {person_data_modified}')
+            logger.debug('Modified data: %s', person_data_modified)
             person_modified_stamps = {entity.modified for entity in person_data_modified}
             new_person_extractor_state = str(max(person_modified_stamps))
 
@@ -49,7 +50,7 @@ def main():
 
             etl_process.start_process(person_data_modified, person_enrich_settings)
             monitor.set_state(R_PERSON_EXTRACTOR_STATE, new_person_extractor_state)
-            logger.info(f"Set person extractor state to new value: {new_person_extractor_state}")
+            logger.info("Set person extractor state to new value: %s", new_person_extractor_state)
 
             logger.info("Timeout for extractor for 2 sec")
             sleep(2)
@@ -66,7 +67,7 @@ def main():
 
         if genre_data_modified:
             logger.info(f"Got non-empty response from db with modified data: genres")
-            logger.debug(f'Modified data: {genre_data_modified}')
+            logger.debug('Modified data: %s', genre_data_modified)
             modified_stamps = {entity.modified for entity in genre_data_modified}
             new_genre_extractor_state = str(max(modified_stamps))
 
@@ -78,7 +79,7 @@ def main():
 
             etl_process.start_process(genre_data_modified, genre_enrich_settings)
             monitor.set_state(R_GENRE_EXTRACTOR_STATE, new_genre_extractor_state)
-            logger.info(f"Set genre extractor state to new value: {new_genre_extractor_state}")
+            logger.info("Set genre extractor state to new value: %s", new_genre_extractor_state)
 
             logger.info("Timeout for extractor for 2 sec")
             sleep(2)
@@ -96,7 +97,7 @@ def main():
 
         if movie_data_modified:
             logger.info(f"Got non-empty response from db with modified data: movies")
-            logger.debug(f'Modified data: {movie_data_modified}')
+            logger.debug('Modified data: %s', movie_data_modified)
             movie_modified_stamps = {entity.modified for entity in movie_data_modified}
             new_movie_extractor_state = str(max(movie_modified_stamps))
 
@@ -106,7 +107,7 @@ def main():
 
             etl_process.start_process(movie_data_modified)
             monitor.set_state(R_MOVIE_EXTRACTOR_STATE, new_movie_extractor_state)
-            logger.info(f"Set movie extractor state to new value: {new_movie_extractor_state}")
+            logger.info("Set movie extractor state to new value: %s", new_movie_extractor_state)
 
             logger.info("Timeout for extractor for 2 sec")
             sleep(2)

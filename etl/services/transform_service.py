@@ -28,7 +28,7 @@ class TransformService:
         return merged_data
 
     def sort_movies_data(self, movie_id: str, all_movies_data: List[RowMapping]) -> List[RowMapping]:
-        logger.info(f"Sorting movies data to get only that related to movie with id {movie_id}")
+        logger.info("Sorting movies data to get only that related to movie with id %s", movie_id)
         # переменная для хранения всех объектов, относящихся к конкретному фильму
         movie_objects = []
         # выбираем из результатов из БД те, что относятся к этому фильму

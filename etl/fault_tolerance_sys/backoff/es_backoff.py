@@ -22,7 +22,7 @@ class ESBackoff:
                 next_timeout = 2
                 while True:
                     try:
-                        logger.critical(f'Timeout before reconnection attempt: {timeout} seconds')
+                        logger.critical('Timeout before reconnection attempt: %s seconds', timeout)
                         sleep(timeout)
                         if timeout < max_timeout:
                             timeout, next_timeout = next_timeout, timeout + next_timeout
@@ -46,7 +46,7 @@ class ESBackoff:
                     next_timeout = 2
                     while True:
                         try:
-                            logger.critical(f'Timeout before reconnection attempt: {timeout} seconds')
+                            logger.critical('Timeout before reconnection attempt: %s seconds', timeout)
                             sleep(timeout)
                             if timeout < max_timeout:
                                 timeout, next_timeout = next_timeout, timeout + next_timeout

@@ -16,7 +16,7 @@ settings = Settings()
 db_con_str = (f"postgresql+psycopg2://"
               f"{settings.DB_USER}:{settings.DB_PASSWORD}"
               f"@{settings.DB_HOST}/{settings.DB_NAME}")
-logger.debug(f"DB Connection string: {db_con_str }")
+logger.debug("DB Connection string: %d", db_con_str)
 engine = create_engine(db_con_str, echo=False, pool_pre_ping=True)
 SessionLocal = sessionmaker(engine, autocommit=False, autoflush=False, class_=Session)
 
@@ -33,7 +33,7 @@ def receive_close(dbapi_connection, connection_record):
 
     while True:
         try:
-            logger.critical(f'Timeout before reconnection attempt: {timeout} seconds')
+            logger.critical('Timeout before reconnection attempt: %s seconds', timeout)
             sleep(timeout)
             if timeout < max_timeout:
                 timeout, next_timeout = next_timeout, timeout + next_timeout

@@ -22,7 +22,7 @@ class RedisClient:
         )
         try:
             info = connection.info()
-            logger.debug(f"Redis version: {info['redis_version']}")
+            logger.debug("Redis version: %s", info['redis_version'])
             response = connection.ping()
             if response:
                 logger.info("Successfully connected to Redis")

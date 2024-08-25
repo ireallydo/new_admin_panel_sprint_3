@@ -14,8 +14,8 @@ class Config:
 
     @classmethod
     def create_extract_config(cls, var_data: ExtractConfigDTO):
-        logger.info(f"Create extractor config for table {var_data.table_name} "
-                    f"with modified value: {var_data.modified}")
+        logger.info('Create extractor config for table %s with modified value %s',
+                    var_data.table_name, var_data.modified)
         extract_config = ExtractSchema(
             table=f'{SCHEMA}.{var_data.table_name}',
             modified=var_data.modified,
@@ -25,8 +25,8 @@ class Config:
 
     @classmethod
     def create_enrich_config(cls, var_data: EnrichConfigDTO):
-        logger.info(f"Create enricher config with offset: {var_data.offset}")
-        logger.debug(f"Entities ids passed to enricher config: {var_data.base_entity_ids}")
+        logger.info("Create enricher config with offset: %s", var_data.offset)
+        logger.debug("Entities ids passed to enricher config: %s", var_data.base_entity_ids)
         enrich_config = EnrichSchema(
             table=f'{SCHEMA}.film_work',
             join_tb_cols_value={
@@ -47,7 +47,7 @@ class Config:
     @classmethod
     def create_merge_config(cls, movies_ids: Set[str]):
         logger.info("Create merger config")
-        logger.debug(f"Movies ids passed to merger config: {movies_ids}")
+        logger.debug("Movies ids passed to merger config: %s", movies_ids)
         merge_config = MergeSchema(
             table=f'{SCHEMA}.film_work',
             select_tb_cols={

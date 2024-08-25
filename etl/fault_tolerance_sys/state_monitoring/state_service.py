@@ -15,13 +15,13 @@ class State:
 
     def set_state(self, key: str, value: Any) -> None:
         """Установить состояние для определённого ключа."""
-        logger.info(f"Set state for key/value pair: key : value")
+        logger.info("Set state for key/value pair: %s / %s", key , value)
         self.storage.save_state({key: value})
 
     def get_state(self, key: str) -> Any:
         """Получить состояние по определённому ключу."""
-        logger.info(f"Get state by key: {key}")
+        logger.info("Get state by key: %s", key)
         state = self.storage.retrieve_state(key)
-        logger.info(f"Received state by key {key}: {state}")
+        logger.info("Received state by key %s: %s", key, state)
         if state is not None:
             return state.decode("utf-8")

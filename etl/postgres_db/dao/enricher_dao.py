@@ -48,9 +48,9 @@ class EnricherDAO:
                     OFFSET {config.offset};
                 """
             )
-            logger.debug(f"Request query string: {query}")
+            logger.debug("Request query string: %s", query)
 
             result = session.execute(query)
             results_as_dict = result.mappings().all()
-            logger.debug(f"Got response from database: {results_as_dict}")
+            logger.debug("Got response from database: %s", results_as_dict)
             return results_as_dict
