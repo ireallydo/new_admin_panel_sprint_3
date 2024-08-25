@@ -3,12 +3,13 @@ from time import sleep
 
 from es.es_connector import init_index
 from fault_tolerance_sys.state_monitoring import RedisStorage, State
-from services import ExtractService, LoadService, TransformService
-from settings.configs import Config
-from settings.constants import (DEFAULT_ENRICHER_STATE,
-                                DEFAULT_EXTRACTOR_STATE, ENRICHER_LOAD_LIMIT,
-                                MOVIES_IDX, R_ENRICHER_STATE,
-                                R_EXTRACTOR_STATE)
+from processes import etl_process, monitoring_process
+from settings.constants import (DEFAULT_EXTRACTOR_STATE, MOVIES_IDX,
+                                R_GENRE_EXTRACTOR_STATE,
+                                R_MOVIE_EXTRACTOR_STATE,
+                                R_PERSON_EXTRACTOR_STATE)
+from settings.dto import EnrichConfigDTO, ExtractConfigDTO
+from utils.get_state_helper import get_state_helper
 from utils.logger import setup_logger
 
 
@@ -18,90 +19,103 @@ def main():
     logger = logging.getLogger()
 
     init_index(MOVIES_IDX)
-    config = Config()
-
-    extractor = ExtractService()
-    transformer = TransformService()
-    loader = LoadService(MOVIES_IDX)
 
     redis_db = RedisStorage()
     monitor = State(redis_db)
 
-
     while True:
 
-        extractor_state = monitor.get_state(R_EXTRACTOR_STATE)
-        if extractor_state  is None:
-            logger.info('State for extractor is not set')
-            monitor.set_state(R_EXTRACTOR_STATE, DEFAULT_EXTRACTOR_STATE)
-            logger.info(f'Set extractor state to default value: {DEFAULT_EXTRACTOR_STATE}')
-            extractor_state  = monitor.get_state(R_EXTRACTOR_STATE)
+        # проверка по персоналиям
 
-        extract_config = config.create_extract_config(extractor_state)
-        persons_data_modified = extractor.extract_modified_data(extract_config)
+        person_monitoring_state = get_state_helper(R_PERSON_EXTRACTOR_STATE, DEFAULT_EXTRACTOR_STATE)
+        person_extract_settings = ExtractConfigDTO(
+            table_name='person',
+            modified=person_monitoring_state
+        )
 
-        if persons_data_modified:
-            logger.info(f"Got non-empty response from db with persons data")
-            logger.debug(f'Persons data: {persons_data_modified}')
-            person_modified_stamps = {person[1] for person in persons_data_modified}
-            new_extractor_state = str(max(person_modified_stamps))
+        person_data_modified = monitoring_process.start_process(person_extract_settings)
 
-            persons_ids = {str(person[0]) for person in persons_data_modified }
+        if person_data_modified:
+            logger.info(f"Got non-empty response from db with modified data: persons")
+            logger.debug(f'Modified data: {person_data_modified}')
+            person_modified_stamps = {entity.modified for entity in person_data_modified}
+            new_person_extractor_state = str(max(person_modified_stamps))
 
-            monitor.set_state(R_ENRICHER_STATE, DEFAULT_ENRICHER_STATE)
-            logger.info(f'Set enricher state to default value before iterating: {R_ENRICHER_STATE}')
+            person_enrich_settings = EnrichConfigDTO(
+                m2m_tb_name='person_film_work',
+                m2m_tb_join_on_col='film_work_id',
+                m2m_tb_filter_col='person_id',
+            )
 
-            while True:
-                enricher_state = int(monitor.get_state(R_ENRICHER_STATE))
-                logger.info(f'Inside enricher loop. Current enricher state: {enricher_state}')
-                enrich_config = config.create_enrich_config(persons_ids, enricher_state)
-                new_enricher_state = enricher_state + ENRICHER_LOAD_LIMIT
+            etl_process.start_process(person_data_modified, person_enrich_settings)
+            monitor.set_state(R_PERSON_EXTRACTOR_STATE, new_person_extractor_state)
+            logger.info(f"Set person extractor state to new value: {new_person_extractor_state}")
 
-                movies_of_persons = extractor.enrich_modified_data(enrich_config)
+            logger.info("Timeout for extractor for 2 sec")
+            sleep(2)
 
-                if movies_of_persons:
-                    logger.info(f"Got non-empty response from db with movies of persons data")
-                    logger.debug(f'Movies of persons data: {movies_of_persons}')
-                    movies_ids = {str(movie[0]) for movie in movies_of_persons}
+        # проверка по жанрам
 
-                    merge_config = config.create_merge_config(movies_ids)
-                    pg_movies_data = extractor.merge_modified_data(merge_config)
+        genre_monitoring_state = get_state_helper(R_GENRE_EXTRACTOR_STATE, DEFAULT_EXTRACTOR_STATE)
+        genre_extract_settings = ExtractConfigDTO(
+            table_name='genre',
+            modified=genre_monitoring_state
+        )
 
-                    logger.debug(f'Got response from db with movies data: {pg_movies_data}')
-                    transformed_data = transformer.pg_to_es_transform_data(
-                        movies_ids=movies_ids,
-                        movies_data=pg_movies_data
-                    )
-                    logger.debug(f'Got transformed data: {transformed_data}')
+        genre_data_modified = monitoring_process.start_process(genre_extract_settings)
 
-                    es_response = loader.load_data_to_es(transformed_data)
-                    logger.info(f"Got response from elasticsearch loader")
-                    logger.debug(f"Response from from elasticsearch loader: {es_response}")
+        if genre_data_modified:
+            logger.info(f"Got non-empty response from db with modified data: genres")
+            logger.debug(f'Modified data: {genre_data_modified}')
+            modified_stamps = {entity.modified for entity in genre_data_modified}
+            new_genre_extractor_state = str(max(modified_stamps))
 
-                    # переход к следующему батчу оффсета только если запись в эластик прошла успешно
-                    if es_response:
-                        logger.info("Positive response from elasticsearch loader")
-                        monitor.set_state(R_ENRICHER_STATE,
-                                          new_enricher_state)
-                        logger.info(f"Set enricher state to new value: {new_enricher_state}")
+            genre_enrich_settings = EnrichConfigDTO(
+                m2m_tb_name='genre_film_work',
+                m2m_tb_join_on_col='film_work_id',
+                m2m_tb_filter_col='genre_id',
+            )
 
-                    logger.info("Negative response from elasticsearch loader. Will reiterate over same data")
+            etl_process.start_process(genre_data_modified, genre_enrich_settings)
+            monitor.set_state(R_GENRE_EXTRACTOR_STATE, new_genre_extractor_state)
+            logger.info(f"Set genre extractor state to new value: {new_genre_extractor_state}")
 
-                    logger.info("Timeout for enricher for 1 sec")
-                    sleep(1)
+            logger.info("Timeout for extractor for 2 sec")
+            sleep(2)
 
-                else:
-                    logger.info('All db data available re extracted persons was loaded to Elasticsearch')
-                    monitor.set_state(R_EXTRACTOR_STATE,
-                                      new_extractor_state)
-                    logger.info(f"Set extractor state to new value: {new_extractor_state}")
+        # проверка по фильмам
 
-                    logger.info("Timeout for extractor for 2 sec")
-                    sleep(2)
-                    break
-        else:
+        movie_monitoring_state = get_state_helper(R_MOVIE_EXTRACTOR_STATE, DEFAULT_EXTRACTOR_STATE)
+        movie_extract_settings = ExtractConfigDTO(
+            table_name='film_work',
+            modified=movie_monitoring_state,
+            limit=2
+        )
+
+        movie_data_modified = monitoring_process.start_process(movie_extract_settings)
+
+        if movie_data_modified:
+            logger.info(f"Got non-empty response from db with modified data: movies")
+            logger.debug(f'Modified data: {movie_data_modified}')
+            movie_modified_stamps = {entity.modified for entity in movie_data_modified}
+            new_movie_extractor_state = str(max(movie_modified_stamps))
+
+            # здесь не передаем конфигу для этапа "обогащения" данных,
+            # поскольку на первом этапе уже достали данные по обновленным фильмам
+            # и для получения их айдишников нам не нужно обращаться к связанным таблицам
+
+            etl_process.start_process(movie_data_modified)
+            monitor.set_state(R_MOVIE_EXTRACTOR_STATE, new_movie_extractor_state)
+            logger.info(f"Set movie extractor state to new value: {new_movie_extractor_state}")
+
+            logger.info("Timeout for extractor for 2 sec")
+            sleep(2)
+
+        sleep(3)
+
+        if not person_data_modified and not genre_data_modified and not movie_data_modified:
             logger.info("All modified data from db for now was loaded to Elasticsearch. "
-                        "Timeout for extractor for 60 sec before retry request for fresh updates")
+                        "Timeout for 60 sec before retry request for fresh updates")
             sleep(60)
 
 

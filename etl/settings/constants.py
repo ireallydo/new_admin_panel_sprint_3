@@ -1,7 +1,10 @@
 SCHEMA = 'content'
 MOVIES_IDX= 'movies'
 
-R_EXTRACTOR_STATE = 'extractor_state'
+R_PERSON_EXTRACTOR_STATE = 'person_extractor_state'
+R_GENRE_EXTRACTOR_STATE = 'genre_extractor_state'
+R_MOVIE_EXTRACTOR_STATE = 'movie_extractor_state'
+
 R_ENRICHER_STATE = 'enricher_state'
 
 EXTRACTOR_LOAD_LIMIT = 100

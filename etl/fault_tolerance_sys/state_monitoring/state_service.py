@@ -23,4 +23,5 @@ class State:
         logger.info(f"Get state by key: {key}")
         state = self.storage.retrieve_state(key)
         logger.info(f"Received state by key {key}: {state}")
-        return state.decode("utf-8")
+        if state is not None:
+            return state.decode("utf-8")

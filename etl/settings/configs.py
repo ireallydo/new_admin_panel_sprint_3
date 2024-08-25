@@ -4,6 +4,7 @@ from typing import Set
 from postgres_db.dto import EnrichSchema, ExtractSchema, MergeSchema
 
 from .constants import ENRICHER_LOAD_LIMIT, SCHEMA
+from .dto import EnrichConfigDTO, ExtractConfigDTO
 
 
 logger = logging.getLogger()
@@ -12,40 +13,41 @@ logger = logging.getLogger()
 class Config:
 
     @classmethod
-    def create_extract_config(cls, modified: str):
-        logger.info(f"Create extractor config with modified value: {modified}")
+    def create_extract_config(cls, var_data: ExtractConfigDTO):
+        logger.info(f"Create extractor config for table {var_data.table_name} "
+                    f"with modified value: {var_data.modified}")
         extract_config = ExtractSchema(
-            table=f'{SCHEMA}.person',
-            modified=modified,
-            limit=100
+            table=f'{SCHEMA}.{var_data.table_name}',
+            modified=var_data.modified,
+            limit=var_data.limit
         )
         return extract_config
 
     @classmethod
-    def create_enrich_config(cls, persons_ids: Set[str], offset: int):
-        logger.info(f"Create enricher config with offset: {offset}")
-        logger.debug(f"Persons ids passed to enricher config: {persons_ids}")
+    def create_enrich_config(cls, var_data: EnrichConfigDTO):
+        logger.info(f"Create enricher config with offset: {var_data.offset}")
+        logger.debug(f"Entities ids passed to enricher config: {var_data.base_entity_ids}")
         enrich_config = EnrichSchema(
             table=f'{SCHEMA}.film_work',
             join_tb_cols_value={
-                f'{SCHEMA}.person_film_work': {
-                    'film_work_id': f'{SCHEMA}.film_work.id'
+                f'{SCHEMA}.{var_data.m2m_tb_name}': {
+                    f'{var_data.m2m_tb_join_on_col}': f'{SCHEMA}.film_work.id'
                 }
             },
             filter_tb_col=(
-                f'{SCHEMA}.person_film_work',
-                'person_id'
+                f'{SCHEMA}.{var_data.m2m_tb_name}',
+                f'{var_data.m2m_tb_filter_col}'
             ),
-            filter_values=persons_ids,
+            filter_values=var_data.base_entity_ids,
             limit=ENRICHER_LOAD_LIMIT,
-            offset=offset
+            offset=var_data.offset
         )
         return enrich_config
 
     @classmethod
     def create_merge_config(cls, movies_ids: Set[str]):
         logger.info("Create merger config")
-        logger.debug(f"Movies ids passed to enricher config: {movies_ids}")
+        logger.debug(f"Movies ids passed to merger config: {movies_ids}")
         merge_config = MergeSchema(
             table=f'{SCHEMA}.film_work',
             select_tb_cols={

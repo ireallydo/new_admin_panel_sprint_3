@@ -32,6 +32,6 @@ class ExtractorDAO:
             logger.debug(f"Request query string: {query}")
 
             result = session.execute(query)
-            resp = [raw for raw in result]
-            logger.debug(f"Got response from database: {resp}")
-            return resp
+            results_as_dict = result.mappings().all()
+            logger.debug(f"Got response from database: {results_as_dict}")
+            return results_as_dict
